@@ -28,7 +28,11 @@ class MyBackTest(BackTest):
 if __name__ == "__main__":
     point_data = pd.read_csv("./point_data_000001.csv", index_col=[0], parse_dates=[2])
     basic_data = pd.read_csv("./basic_data_000001.csv", index_col=[0], parse_dates=[2])
-    ins = MyBackTest(point_data, datetime.datetime(2016, 5, 1), datetime.datetime(2019, 1, 31), 10000, max_period=11, parameter_map={"sma_5": [5, 7], "sma_10": [10, 14]})
+    ins = MyBackTest(point_data,
+                     datetime.datetime(2016, 5, 1), datetime.datetime(2019, 1, 31),
+                     10000, max_period=11,
+                     parameter_map={"sma_5": [5, 7], "sma_10": [10, 14]}, plot_flag=False,
+                     commission=0.0022)
     gain_loss = ins.start()
     print(gain_loss)
 

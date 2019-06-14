@@ -2,13 +2,15 @@ import copy
 
 import pandas as pd
 
+from core.plot_data import plot_data
+
 
 class BackTest:
     """
     回测核心类, 继承该类以定制策略, 覆盖 sizer 及 strategy
     """
 
-    def __init__(self, data, start_date, end_date, init_funding, max_period=0, commission=0, plot_flag=False, parameter_map=None, **kwargs):
+    def __init__(self, data, start_date, end_date, init_funding, max_period=0, commission=0.0022, plot_flag=False, parameter_map=None, **kwargs):
         """
         初始化类
         :param data: 回测数据, DataFrame, 至少包含日期与开盘价, 收盘价, 最高价, 最低价, 以日期升序排序
@@ -20,7 +22,7 @@ class BackTest:
         :param end_date: 回测结束时间 datetime.datetime
         :param init_funding: 初始资金
         :param max_period: 数据区间, 计算过程中, 至少需要多少天的数据, 比如原始数据从1号开始, 至少需要5天的数据计算平均值, 那么真正的计算过程会从6号开始
-        :param commission: 手续费
+        :param commission: 手续费, 这个目前不太准, 只是一个大约的数值, 并不紧急
         :param plot_flag: 是否画图
         :param parameter_map: 测试不同参数效果的参数列表
             {
@@ -47,7 +49,7 @@ class BackTest:
         self.trans_amount = 0  # 交易数量
 
         self.parameter = {}
-        self.result = []  # 存储每日的交易持仓等信息, [日期, 买卖标志, 交易价格, 交易数量, 现金, 持仓数量, ]
+        self.result = []  # 存储每日的交易持仓等信息, [日期, 买卖标志, 交易价格, 交易数量, 现金, 持仓数量, 资产]
 
     def sizer(self):
         """
@@ -69,7 +71,7 @@ class BackTest:
 
     def plot(self):
         """作图, 使用self.result作为数据源"""
-        pass
+        plot_data(self.data_all, self.result)
 
     def _bs(self):
         """
@@ -78,10 +80,10 @@ class BackTest:
         """
         if self.bs_flag == "B":
             self.amount = self.amount + self.trans_amount if self.amount else self.trans_amount
-            self.cash = self.cash - self.trans_amount * self.price
+            self.cash = self.cash - self.trans_amount * (self.price + self.commission)
         elif self.bs_flag == "S":
             self.amount = self.amount - self.trans_amount
-            self.cash = self.cash + self.trans_amount * self.price
+            self.cash = self.cash + self.trans_amount * (self.price + self.commission)
 
     def _execute(self):
         """
@@ -97,13 +99,13 @@ class BackTest:
                 self.sizer()
                 self._bs()
 
-                self.trans_amount = None
-                self.bs_flag = None
-
-            self.result.append([date_now, self.bs_flag, self.price, self.trans_amount, self.cash, self.amount])
+            self.result.append([date_now, self.bs_flag, self.price, self.trans_amount, self.cash, self.amount, self.cash + self.amount * self.data.iloc[-1]["close"]])
+            self.trans_amount = None
+            self.bs_flag = None
 
         if self.plot_flag is True:
-            self.result = pd.DataFrame(self.result, columns=["trade_date", "bs_flag", "price", "trans_amount", "cash", "amount"])
+            self.result = pd.DataFrame(self.result, columns=["trade_date", "bs_flag", "price", "trans_amount", "cash", "amount", "property"])
+            # self.result.to_csv("./bs_data.csv")
             self.plot()
 
         return self.cash + self.amount * self.data.iloc[-1]["close"]
