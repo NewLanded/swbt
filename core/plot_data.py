@@ -4,7 +4,7 @@ import seaborn as sns
 import pandas as pd
 
 
-def plot_data(point_data, bs_data):
+def plot_data(point_data, bs_data, manual_plot_data):
     """
     绘图
     :param point_data: 回测数据, DataFrame, 至少包含日期与开盘价, 收盘价, 最高价, 最低价, 以日期升序排序
@@ -27,6 +27,9 @@ def plot_data(point_data, bs_data):
     那么x,y的取值就表示该子图坐标原点的横坐标值和纵坐标值占大图整个长宽的比例。而width和height则表示子图的宽和高占整个大图的宽和高的比例。
     如果不传入参数则表示选取默认坐标轴，即大图的坐标轴。
     """
+    sns.set()
+    sns.set_palette(sns.color_palette('dark'))
+
     fig = plt.figure(figsize=(12, 9))
 
     ax1 = plt.axes([0.1, 0.2, 0.8, 0.5])
@@ -37,10 +40,19 @@ def plot_data(point_data, bs_data):
     s_date_bs_data = bs_data[bs_data["bs_flag"] == "S"]
     s_date_point_data = point_data[point_data["trade_date"].isin(s_date_bs_data["trade_date"])]
 
-    ax1.plot(point_data["trade_date"], point_data["close"], ls="-", lw=1, color='g')
+    ax1.plot(point_data["trade_date"], point_data["close"], ls="-", lw=1, color='y')
     ax1.plot(b_date_point_data["trade_date"], b_date_point_data["close"], "o", color='r', markersize=3)
-    ax1.plot(s_date_point_data["trade_date"], s_date_point_data["close"], "o", color='b', markersize=3)
-    ax1.legend(loc="upper left", bbox_to_anchor=(0.05, 0.95), ncol=3, title="color meaning", shadow=True, fancybox=True, labels=['close point', 'buy', "sell"])
+    ax1.plot(s_date_point_data["trade_date"], s_date_point_data["close"], "o", color='g', markersize=3)
+    labels = ['close point', 'buy', "sell"]
+
+    if not manual_plot_data.empty:
+        manual_plot_data_columns = list(manual_plot_data.columns)
+        manual_plot_data_columns.remove("trade_date")
+        for manual_plot_data_column in manual_plot_data_columns:
+            ax1.plot(manual_plot_data["trade_date"], manual_plot_data[manual_plot_data_column], ls="-", lw=1)
+            labels.append(manual_plot_data_column)
+
+    ax1.legend(loc="upper left", bbox_to_anchor=(0.05, 0.95), ncol=3, title="color meaning", shadow=True, fancybox=True, labels=labels)
 
     ax2 = plt.axes([0.1, 0.75, 0.8, 0.2], sharex=ax1)
     ax2.plot(bs_data["trade_date"], bs_data["property"], ls="-", lw=1)
@@ -55,4 +67,4 @@ def plot_data(point_data, bs_data):
 if __name__ == "__main__":
     point_data = pd.read_csv("../examples/point_data_000001.csv", index_col=[0], parse_dates=[2])
     bs_data = pd.read_csv("../examples/bs_data.csv", index_col=[0], parse_dates=[1])
-    plot_data(point_data, bs_data)
+    plot_data(point_data, bs_data, pd.DataFrame())

@@ -24,6 +24,8 @@ class MyBackTest(BackTest):
         else:
             pass
 
+        self._add_manual_plot_data({"trade_date": self.data["trade_date"].iloc[-1], "sma_data_5": sma_data_5.iloc[-1], "sma_data_10": sma_data_10.iloc[-1]})  # 将 sma_data_5 和 sma_data_10 画图
+
 
 if __name__ == "__main__":
     point_data = pd.read_csv("./point_data_000001.csv", index_col=[0], parse_dates=[2])
@@ -31,7 +33,7 @@ if __name__ == "__main__":
     ins = MyBackTest(point_data,
                      datetime.datetime(2016, 5, 1), datetime.datetime(2019, 1, 31),
                      10000, max_period=11,
-                     parameter_map={"sma_5": [5, 7], "sma_10": [10, 14]}, plot_flag=False,
+                     parameter_map={"sma_5": [5, 7], "sma_10": [10, 14]}, plot_flag=True,
                      commission=0.0022)
     gain_loss = ins.start()
     print(gain_loss)

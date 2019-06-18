@@ -50,6 +50,7 @@ class BackTest:
 
         self.parameter = {}
         self.result = []  # 存储每日的交易持仓等信息, [日期, 买卖标志, 交易价格, 交易数量, 现金, 持仓数量, 资产]
+        self.manual_plot_data = {}  # 自定义画图的数据
 
     def sizer(self):
         """
@@ -69,9 +70,35 @@ class BackTest:
         """
         pass
 
+    def _add_manual_plot_data(self, plot_data_dict):
+        """
+        将需要画图的数据, 以key, value的形式写在plot_data_dict中 (plot_data_dict至少需要包含一个trade_date)
+        :param plot_data_dict:  {
+            trade_date: datetime.datetime(2016, 1, 1),
+            my_point: 10,
+            ...
+        }
+        :return:
+        """
+        self.manual_plot_data[plot_data_dict["trade_date"]] = {}
+        for k, v in plot_data_dict.items():
+            self.manual_plot_data[plot_data_dict["trade_date"]][k] = v
+
     def plot(self):
         """作图, 使用self.result作为数据源"""
-        plot_data(self.data_all, self.result)
+        trade_date_list = list(self.manual_plot_data)
+        trade_date_list.sort()
+        if trade_date_list:
+            manual_plot_data = {}
+            key_list = list(self.manual_plot_data[trade_date_list[0]])
+            for date in trade_date_list:
+                for key in key_list:
+                    manual_plot_data.setdefault(key, []).append(self.manual_plot_data.get(date, {}).get(key, None))
+            manual_plot_data = pd.DataFrame(manual_plot_data)
+        else:
+            manual_plot_data = pd.DataFrame()
+
+        plot_data(self.data_all, self.result, manual_plot_data)
 
     def _bs(self):
         """
