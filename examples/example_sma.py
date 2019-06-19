@@ -24,7 +24,7 @@ class MyBackTest(BackTest):
         else:
             pass
 
-        self._add_manual_plot_data({"trade_date": self.data["trade_date"].iloc[-1], "sma_data_5": sma_data_5.iloc[-1], "sma_data_10": sma_data_10.iloc[-1]})  # 将 sma_data_5 和 sma_data_10 画图
+        # self._add_manual_plot_data({"trade_date": self.data["trade_date"].iloc[-1], "sma_data_5": sma_data_5.iloc[-1], "sma_data_10": sma_data_10.iloc[-1]})  # 将 sma_data_5 和 sma_data_10 画图
 
 
 if __name__ == "__main__":

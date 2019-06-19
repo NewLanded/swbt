@@ -68,6 +68,13 @@ class BackTest:
         交易策略, 需设置 self.bs_flag 为 B 或 S, 若无买卖信号则无需设置
         :return:
         """
+        raise NotImplementedError
+
+    def after_execute(self):
+        """
+        在测试执行完成后, 用户想做的一些其他的操作
+        :return:
+        """
         pass
 
     def _add_manual_plot_data(self, plot_data_dict):
@@ -134,6 +141,8 @@ class BackTest:
             self.result = pd.DataFrame(self.result, columns=["trade_date", "bs_flag", "price", "trans_amount", "cash", "amount", "property"])
             # self.result.to_csv("./bs_data.csv")
             self.plot()
+
+        self.after_execute()
 
         return self.cash + self.amount * self.data.iloc[-1]["close"]
 
