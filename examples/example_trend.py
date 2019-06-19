@@ -25,6 +25,27 @@ class MyBackTest(BackTest):
 
 
 if __name__ == "__main__":
+    """
+
+{
+    "hs300": {
+        "稳定平静": [],
+        "稳定波动": [],
+        "上涨平静": [],
+        "上涨波动": [],
+        "下跌平静": [],
+        "下跌波动": []
+    },
+    "600030": {
+        "稳定平静": [],
+        "稳定波动": [],
+        "上涨平静": [],
+        "上涨波动": [],
+        "下跌平静": [],
+        "下跌波动": []
+    }
+}
+    """
     point_data_hs300 = pd.read_csv("./point_data_used_by_trend_hs300.csv", index_col=[0], parse_dates=[2])
     point_data_600030 = pd.read_csv("./point_data_used_by_trend_600030.csv", index_col=[0], parse_dates=[2])
     ins = MyBackTest(point_data_hs300,
