@@ -26,25 +26,60 @@ class MyBackTest(BackTest):
 
 if __name__ == "__main__":
     """
-
-{
-    "hs300": {
-        "稳定平静": [],
-        "稳定波动": [],
-        "上涨平静": [],
-        "上涨波动": [],
-        "下跌平静": [],
-        "下跌波动": []
-    },
-    "600030": {
-        "稳定平静": [],
-        "稳定波动": [],
-        "上涨平静": [],
-        "上涨波动": [],
-        "下跌平静": [],
-        "下跌波动": []
+    {
+        "month": {  # 2-3个月的趋势
+            "hs300": {
+                "稳定平静": [],
+                "稳定波动": [],
+                "上涨平静": [],
+                "上涨波动": [
+                    [datetime.datetime(2016, 2, 1), datetime.datetime(2018, 1, 20)],
+                    [datetime.datetime(2019, 1, 1), datetime.datetime(2019, 4, 15)]
+                    ],
+                "下跌平静": [],
+                "下跌波动": [
+                    [datetime.datetime(2018, 1, 20), datetime.datetime(2019, 1, 1)],
+                    [datetime.datetime(2019, 4, 15), datetime.datetime(2016, 6, 17)]
+                    ]
+            },
+            "600030": {
+                "稳定平静": [],
+                "稳定波动": [
+                    [datetime.datetime(2016, 2, 1), datetime.datetime(2017, 5, 1)],
+                    [datetime.datetime(2018, 10, 20), datetime.datetime(2018, 12, 20)],
+                    ],
+                "上涨平静": [
+                    [datetime.datetime(2018, 12, 20), datetime.datetime(2019, 3, 7)]
+                    ],
+                "上涨波动": [
+                    [datetime.datetime(2017, 5, 1), datetime.datetime(2018, 1, 24)]
+                    ],
+                "下跌平静": [],
+                "下跌波动": [
+                    [datetime.datetime(2018, 1, 24), datetime.datetime(2018, 10, 20)]
+                    [datetime.datetime(2019, 3, 7), datetime.datetime(2019, 6, 17)]
+                    ]
+            }
+        },
+        "week": {  # 1-2个星期的趋势
+            "hs300": {
+                "稳定平静": [],
+                "稳定波动": [],
+                "上涨平静": [],
+                "上涨波动": [],
+                "下跌平静": [],
+                "下跌波动": []
+            },
+            "600030": {
+                "稳定平静": [],
+                "稳定波动": [],
+                "上涨平静": [],
+                "上涨波动": [],
+                "下跌平静": [],
+                "下跌波动": []
+            }
+        }
     }
-}
     """
     point_data_hs300 = pd.read_csv("./point_data_used_by_trend_hs300.csv", index_col=[0], parse_dates=[2])
     point_data_600030 = pd.read_csv("./point_data_used_by_trend_600030.csv", index_col=[0], parse_dates=[2])
