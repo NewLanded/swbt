@@ -113,11 +113,17 @@ class BackTest:
         :return:
         """
         if self.bs_flag == "B":
-            self.amount = self.amount + self.trans_amount if self.amount else self.trans_amount
-            self.cash = self.cash - self.trans_amount * (self.price + self.commission)
+            if self.trans_amount:
+                self.amount = self.amount + self.trans_amount if self.amount else self.trans_amount
+                self.cash = self.cash - self.trans_amount * (self.price + self.commission)
+            else:
+                self.bs_flag = None  # 交易数量为0时不进行交易
         elif self.bs_flag == "S":
-            self.amount = self.amount - self.trans_amount
-            self.cash = self.cash + self.trans_amount * (self.price + self.commission)
+            if self.trans_amount:
+                self.amount = self.amount - self.trans_amount
+                self.cash = self.cash + self.trans_amount * (self.price + self.commission)
+            else:
+                self.bs_flag = None
 
     def _execute(self):
         """
