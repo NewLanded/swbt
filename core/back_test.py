@@ -10,6 +10,35 @@ class BackTest:
     回测核心类, 继承该类以定制策略, 覆盖 sizer 及 strategy
     """
 
+    def _store_ori_init_param(self, start_date, end_date, init_funding, max_period, commission, plot_flag, parameter_map, kwargs):
+        self._ori_param = {}
+        self._ori_param['start_date'] = start_date
+        self._ori_param['end_date'] = end_date
+        self._ori_param['init_funding'] = init_funding
+        self._ori_param['max_period'] = max_period
+        self._ori_param['commission'] = commission
+        self._ori_param['plot_flag'] = plot_flag
+        self._ori_param['parameter_map'] = parameter_map
+        self._ori_param['kwargs'] = kwargs
+
+    def _set_init_param_ever_loop(self):
+        self.start_date = self._ori_param['start_date']
+        self.end_date = self._ori_param['end_date']
+        self.cash = self._ori_param['init_funding']  # 可用资金
+        self.max_period = self._ori_param['max_period']
+        self.commission = self._ori_param['commission']
+        self.plot_flag = self._ori_param['plot_flag']
+        self.parameter_map = self._ori_param['parameter_map']
+        self.args = self._ori_param['kwargs']
+
+        self.amount = 0  # 持仓数量
+        self.bs_flag = None  # 交易标志, 买: B, 卖: S
+        self.price = 0  # 交易价格
+        self.trans_amount = 0  # 交易数量
+
+        self.result = []  # 存储每日的交易持仓等信息, [日期, 买卖标志, 交易价格, 交易数量, 现金, 持仓数量, 资产]
+        self.manual_plot_data = {}  # 自定义画图的数据
+
     def __init__(self, data, start_date, end_date, init_funding, max_period=0, commission=0.0022, plot_flag=False, parameter_map=None, **kwargs):
         """
         初始化类
@@ -34,23 +63,10 @@ class BackTest:
         :param kwargs: 其他参数, 会放在self.args中供全局调用
         """
         self.data_all = data[(start_date <= data["trade_date"]) & (data["trade_date"] <= end_date)]
-        self.start_date = start_date
-        self.end_date = end_date
-        self.cash = init_funding  # 可用资金
-        self.max_period = max_period
-        self.commission = commission
-        self.plot_flag = plot_flag
-        self.parameter_map = parameter_map
-        self.args = kwargs
-
-        self.amount = 0  # 持仓数量
-        self.bs_flag = None  # 交易标志, 买: B, 卖: S
-        self.price = 0  # 交易价格
-        self.trans_amount = 0  # 交易数量
-
         self.parameter = {}
-        self.result = []  # 存储每日的交易持仓等信息, [日期, 买卖标志, 交易价格, 交易数量, 现金, 持仓数量, 资产]
-        self.manual_plot_data = {}  # 自定义画图的数据
+
+        self._store_ori_init_param(start_date, end_date, init_funding, max_period, commission, plot_flag, parameter_map, kwargs)
+        self._set_init_param_ever_loop()
 
     def sizer(self):
         """
@@ -188,6 +204,7 @@ class BackTest:
                 for key, value in zip(keys_list, parameter_list):
                     self.parameter[key] = value
                     parameter_str += str(key) + ":" + str(value) + ","
+                self._set_init_param_ever_loop()
                 gain_loss = self._execute()
                 result[parameter_str] = gain_loss
                 parameter_str = ""
