@@ -1,4 +1,8 @@
-"""在有巨大回撤之后, 20日均线趋于平缓的时候, 买入"""
+"""
+在有回撤之后买入, 涨到回撤前的高点左右卖出
+这个策略不适合下跌行情, 在下跌行情中反应比较慢, 等到买的时候, 差不多反弹也结束了
+还是会发生比较大的回撤, 但是也没啥办法
+"""
 import datetime
 
 import talib as ta
@@ -15,13 +19,18 @@ class MyBackTest(BackTest):
 
     def strategy(self):
         sma_data = ta.MA(self.data["close"], timeperiod=self.parameter["sma"], matype=0)
-        slope_30 = ta.LINEARREG_SLOPE(sma_data, timeperiod=self.parameter["slope"])
+        slope = ta.LINEARREG_SLOPE(sma_data, timeperiod=self.parameter["slope"])
 
-        # if slope_30.iloc[-2] < 0 and slope_30.iloc[-1] > 0:
-        if (self.data["close"].iloc[-1] - max(self.data["close"].iloc[-40:])) / max(self.data["close"].iloc[-40:]) < -0.2 and self.data["close"].iloc[-1] > self.data["close"].iloc[-2]:
+        if slope.iloc[-2] < 0 and slope.iloc[-1] > 0:
             self.bs_flag = "B"
-        elif slope_30.iloc[-2] > 0 and slope_30.iloc[-1] < 0:
-            self.bs_flag = "S"
+            self.args["period_max_point"] = max(self.data["close"].iloc[-40:])
+        elif self.amount:
+            if slope.iloc[-2] > 0 and slope.iloc[-1] < 0:
+                self.bs_flag = "S"
+            elif (self.data["close"].iloc[-1] - self.args["period_max_point"]) / self.args["period_max_point"] > -0.02:
+                if self.data["close"].iloc[-1] < self.data["close"].iloc[-2] < self.data["close"].iloc[-3] < self.data["close"].iloc[-4]:
+                    self.bs_flag = "S"
+
         else:
             pass
 
@@ -32,7 +41,7 @@ if __name__ == "__main__":
     ins = MyBackTest(point_data,
                      datetime.datetime(2016, 5, 1), datetime.datetime(2019, 1, 31),
                      10000, max_period=30,
-                     parameter_map={"sma": [20], "slope": [13, 14]}, plot_flag=True,
+                     parameter_map={"sma": [5], "slope": [11]}, plot_flag=False,
                      commission=0.0022)
     gain_loss = ins.start()
     print(gain_loss)
